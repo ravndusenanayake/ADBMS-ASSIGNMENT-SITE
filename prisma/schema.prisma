@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Person {
+  Person_ID      Int      @id @default(autoincrement())
+  First_Name     String   @db.VarChar(50)
+  Last_Name      String   @db.VarChar(50)
+  NIC            String   @unique @db.VarChar(15)
+  Contact_Number String?  @db.VarChar(15)
+  Address        String?  @db.VarChar(255)
+  Person_Type    String   @db.VarChar(20)
+  Patient        Patient?
+  Dentist        Dentist?
+}
+
+model Patient {
+  Patient_ID    Int           @id
+  Person        Person        @relation(fields: [Patient_ID], references: [Person_ID], onDelete: Cascade)
+  Date_of_Birth DateTime      @db.Date
+  Blood_Group   String?       @db.VarChar(5)
+  Allergies     String?       @db.VarChar(Max)
+  Appointments  Appointment[]
+}
+
+model Dentist {
+  Dentist_ID     Int           @id
+  Person         Person        @relation(fields: [Dentist_ID], references: [Person_ID], onDelete: Cascade)
+  SLMC_Reg_No    String        @unique @db.VarChar(20)
+  Specialization String?       @db.VarChar(100)
+  Appointments   Appointment[]
+}
+
+model Appointment {
+  Appointment_ID Int                     @id @default(autoincrement())
+  Date           DateTime                @db.Date
+  Time           DateTime                @db.DateTime
+  Status         String                  @default("Pending") @db.VarChar(20)
+  Patient_ID     Int
+  Dentist_ID     Int
+  Patient        Patient                 @relation(fields: [Patient_ID], references: [Patient_ID], onDelete: NoAction, onUpdate: NoAction)
+  Dentist        Dentist                 @relation(fields: [Dentist_ID], references: [Dentist_ID], onDelete: NoAction, onUpdate: NoAction)
+  Treatments     Appointment_Treatment[]
+  Payment        Payment?
+}
+
+model Treatment {
+  Treatment_ID   Int                     @id @default(autoincrement())
+  Treatment_Name String                  @db.VarChar(100)
+  Base_Price     Decimal                 @db.Decimal(10, 2)
+  Appointments   Appointment_Treatment[]
+}
+
+model Appointment_Treatment {
+  Appointment_ID Int
+  Treatment_ID   Int
+  Appointment    Appointment @relation(fields: [Appointment_ID], references: [Appointment_ID])
+  Treatment      Treatment   @relation(fields: [Treatment_ID], references: [Treatment_ID])
+
+  @@id([Appointment_ID, Treatment_ID])
+}
+
+model Payment {
+  Payment_ID     Int         @id @default(autoincrement())
+  Amount         Decimal     @db.Decimal(10, 2)
+  Date           DateTime    @default(now()) @db.Date
+  Payment_Method String?     @db.VarChar(50)
+  Appointment_ID Int         @unique
+  Appointment    Appointment @relation(fields: [Appointment_ID], references: [Appointment_ID])
+}
