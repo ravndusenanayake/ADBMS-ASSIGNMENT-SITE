@@ -85,8 +85,7 @@ const addTreatmentsToAppointment = async (req, res) => {
         
         // Use createMany to insert multiple Treatment_Appointment records
         await prisma.appointment_Treatment.createMany({
-            data,
-            skipDuplicates: true
+            data
         });
 
         res.status(201).json({ message: 'Treatments added successfully' });
