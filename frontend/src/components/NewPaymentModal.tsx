@@ -16,6 +16,7 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
   
   const [appointmentId, setAppointmentId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [amount, setAmount] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -35,16 +36,26 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
 
   // Calculate amount based on the selected appointment
   const selectedAppointment = appointments.find(a => a.Appointment_ID.toString() === appointmentId);
-  const totalAmount = selectedAppointment?.Treatments?.reduce(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (sum: number, t: any) => sum + parseFloat(t.Treatment.Base_Price),
-    0
-  ) || 0;
+
+  useEffect(() => {
+    if (appointmentId && appointments.length > 0) {
+      const selected = appointments.find(a => a.Appointment_ID.toString() === appointmentId);
+      const calculatedAmount = selected?.Treatments?.reduce(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (sum: number, t: any) => sum + parseFloat(t.Treatment.Base_Price),
+        0
+      ) || 0;
+      setAmount(calculatedAmount > 0 ? calculatedAmount.toFixed(2) : "");
+    } else {
+      setAmount("");
+    }
+  }, [appointmentId, appointments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const finalAmount = parseFloat(amount || "0");
     if (!appointmentId) return alert("Please select an appointment.");
-    if (totalAmount <= 0) return alert("Total amount must be greater than zero. Make sure treatments are assigned.");
+    if (finalAmount <= 0) return alert("Total amount must be greater than zero.");
 
     setLoading(true);
     
@@ -54,7 +65,7 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           appointmentId: parseInt(appointmentId),
-          amount: totalAmount,
+          amount: finalAmount,
           paymentMethod
         })
       });
@@ -64,6 +75,7 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
         onClose();
         setAppointmentId("");
         setPaymentMethod("Cash");
+        setAmount("");
       } else {
         const errorData = await response.json();
         alert(`Failed to process payment: ${errorData.error}`);
@@ -116,10 +128,13 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
               <div className="relative">
                 <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
-                  type="text" 
-                  readOnly
-                  value={appointmentId ? totalAmount.toFixed(2) : "0.00"}
-                  className="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-emerald-600 dark:text-emerald-400 font-extrabold focus:outline-none cursor-not-allowed"
+                  type="number"
+                  step="0.01"
+                  required
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-emerald-600 dark:text-emerald-400 font-extrabold focus:outline-none focus:ring-2 focus:ring-sky-500/30 transition-all"
                 />
               </div>
               {appointmentId && selectedAppointment?.Treatments?.length > 0 && (
@@ -165,7 +180,7 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
             </button>
             <button 
               type="submit" 
-              disabled={loading || !appointmentId || totalAmount <= 0}
+              disabled={loading || !appointmentId || parseFloat(amount || "0") <= 0}
               className="flex-1 btn-primary text-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? "Processing..." : "Process Payment"}
