@@ -3,6 +3,7 @@
 import { Users, CalendarCheck, Banknote, ArrowRight, Activity } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { RevenueChart } from "@/components/RevenueChart";
 
 export default function Dashboard() {
   const [mounted, setMounted] = useState(false);
@@ -44,6 +45,15 @@ export default function Dashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Revenue Chart */}
+      <div className="glass-card p-6 md:p-8 bg-white dark:bg-slate-800/50">
+        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+          <Activity size={20} className="text-sky-600 dark:text-sky-400" /> Revenue Trend
+        </h3>
+        <p className="text-sm text-slate-500 mb-6">Monthly revenue performance for the past 6 months.</p>
+        <RevenueChart />
       </div>
 
       {/* Quick Actions */}

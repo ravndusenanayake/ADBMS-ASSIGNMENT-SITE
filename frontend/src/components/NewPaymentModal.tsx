@@ -18,6 +18,10 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [amount, setAmount] = useState("");
   const [amountTendered, setAmountTendered] = useState("");
+  
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [receiptData, setReceiptData] = useState<any>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -80,11 +84,16 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
       
       if (response.ok) {
         onSuccess();
-        onClose();
-        setAppointmentId("");
-        setPaymentMethod("Cash");
-        setAmount("");
-        setAmountTendered("");
+        setReceiptData({
+          appointment: selectedAppointment,
+          amount: finalAmount,
+          paymentMethod,
+          amountTendered: paymentMethod === "Cash" ? tendered : finalAmount,
+          balance: paymentMethod === "Cash" ? tendered - finalAmount : 0,
+          date: new Date().toLocaleString(),
+          receiptNo: `REC-${Date.now().toString().slice(-6)}`
+        });
+        setPaymentSuccess(true);
       } else {
         const errorData = await response.json();
         alert(`Failed to process payment: ${errorData.error}`);
@@ -98,6 +107,96 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
   };
 
   if (!isOpen) return null;
+
+  if (paymentSuccess && receiptData) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="glass-card w-full max-w-md bg-white dark:bg-slate-900 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+          <div id="printable-receipt" className="p-8 bg-white text-slate-800">
+            <div className="text-center mb-6 border-b pb-6 border-slate-200">
+              <h1 className="text-2xl font-bold text-slate-900">LumiSmile Dental</h1>
+              <p className="text-sm text-slate-500">Receipt #{receiptData.receiptNo}</p>
+              <p className="text-sm text-slate-500">{receiptData.date}</p>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Patient</p>
+                <p className="font-medium text-slate-800">{receiptData.appointment?.Patient?.Person?.First_Name} {receiptData.appointment?.Patient?.Person?.Last_Name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Dentist</p>
+                <p className="font-medium text-slate-800">Dr. {receiptData.appointment?.Dentist?.Person?.Last_Name}</p>
+              </div>
+              
+              {receiptData.appointment?.Treatments?.length > 0 && (
+                <div className="pt-4 border-t border-slate-200">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-2">Treatments</p>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {receiptData.appointment.Treatments.map((t: any) => (
+                    <div key={t.Treatment_ID} className="flex justify-between text-sm mb-1 text-slate-700">
+                      <span>{t.Treatment.Treatment_Name}</span>
+                      <span>Rs. {parseFloat(t.Treatment.Base_Price).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="border-t-2 border-slate-800 pt-4 space-y-2">
+              <div className="flex justify-between font-bold text-lg text-slate-900">
+                <span>Total Amount</span>
+                <span>Rs. {receiptData.amount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-slate-600">
+                <span>Payment Method</span>
+                <span>{receiptData.paymentMethod}</span>
+              </div>
+              {receiptData.paymentMethod === "Cash" && (
+                <>
+                  <div className="flex justify-between text-sm text-slate-600 mt-2 border-t border-slate-100 pt-2">
+                    <span>Cash Given</span>
+                    <span>Rs. {receiptData.amountTendered.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold text-slate-800">
+                    <span>Balance</span>
+                    <span>Rs. {receiptData.balance.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="mt-8 text-center text-sm text-slate-500 italic">
+              Thank you for visiting LumiSmile Dental Care!
+            </div>
+          </div>
+          
+          <div className="p-6 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-white/10 flex gap-3 print:hidden">
+            <button 
+              onClick={() => {
+                setPaymentSuccess(false);
+                setReceiptData(null);
+                setAppointmentId("");
+                setPaymentMethod("Cash");
+                setAmount("");
+                setAmountTendered("");
+                onClose();
+              }}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              Done
+            </button>
+            <button 
+              onClick={() => window.print()}
+              className="flex-1 btn-primary text-center"
+            >
+              Print Receipt
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
