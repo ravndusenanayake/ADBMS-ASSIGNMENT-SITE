@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, DollarSign, Activity } from "lucide-react";
+import { Plus, Search, Banknote, Activity } from "lucide-react";
 import { NewTreatmentModal } from "@/components/NewTreatmentModal";
 
 export default function TreatmentsPage() {
@@ -68,7 +68,7 @@ export default function TreatmentsPage() {
                     <Activity size={24} strokeWidth={2} />
                   </div>
                   <span className="flex items-center gap-1 font-extrabold text-emerald-600 dark:text-emerald-400 text-lg bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
-                    <DollarSign size={16} /> {t.Base_Price}
+                    <Banknote size={16} /> Rs. {t.Base_Price}
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{t.Treatment_Name}</h3>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Activity, DollarSign } from "lucide-react";
+import { X, Activity, Banknote } from "lucide-react";
 
 interface NewTreatmentModalProps {
   isOpen: boolean;
@@ -79,9 +79,9 @@ export function NewTreatmentModal({ isOpen, onClose, onSuccess }: NewTreatmentMo
             </div>
             
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Base Price ($)</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Base Price (Rs.)</label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
                   type="number" 
                   step="0.01"

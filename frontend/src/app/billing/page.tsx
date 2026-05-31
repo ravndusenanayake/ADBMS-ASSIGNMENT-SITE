@@ -87,7 +87,7 @@ export default function BillingPage() {
                       </span>
                     </td>
                     <td className="data-table-cell text-right text-emerald-600 dark:text-emerald-400 font-extrabold text-base">
-                      ${p.Amount}
+                      Rs. {p.Amount}
                     </td>
                     <td className="data-table-cell text-right">
                       <button className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:text-white dark:hover:bg-white/10 rounded-lg transition-colors inline-flex items-center gap-2 text-xs font-bold">

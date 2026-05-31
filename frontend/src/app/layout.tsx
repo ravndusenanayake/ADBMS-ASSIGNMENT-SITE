@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { Home, Calendar, ClipboardList, Activity, Users, Settings, DollarSign, Stethoscope } from "lucide-react";
+import { Home, Calendar, ClipboardList, Activity, Users, Settings, Banknote, Stethoscope } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -49,7 +49,7 @@ export default function RootLayout({
                   <ClipboardList size={20} /> Treatments
                 </Link>
                 <Link href="/billing" className="nav-link">
-                  <DollarSign size={20} /> Billing
+                  <Banknote size={20} /> Billing
                 </Link>
               </nav>
               

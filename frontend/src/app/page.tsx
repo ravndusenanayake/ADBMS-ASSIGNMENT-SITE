@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, CalendarCheck, DollarSign, ArrowRight, Activity } from "lucide-react";
+import { Users, CalendarCheck, Banknote, ArrowRight, Activity } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -17,7 +17,7 @@ export default function Dashboard() {
   const stats = [
     { title: "Total Patients", value: "1,284", icon: Users, color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-500/10", border: "border-sky-100 dark:border-sky-500/20" },
     { title: "Pending Appts", value: "12", icon: CalendarCheck, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10", border: "border-amber-100 dark:border-amber-500/20" },
-    { title: "Revenue (MTD)", value: "$45,200", icon: DollarSign, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20" },
+    { title: "Revenue (MTD)", value: "Rs. 45,200", icon: Banknote, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20" },
   ];
 
   return (
