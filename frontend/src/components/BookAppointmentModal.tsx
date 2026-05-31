@@ -131,27 +131,46 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess }: BookAppoint
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Treatments</label>
-            <div className="relative">
-              <Activity className="absolute left-3 top-3 text-slate-400" size={18} />
-              <select 
-                multiple
-                value={selectedTreatments}
-                onChange={(e) => {
-                  const options = Array.from(e.target.selectedOptions);
-                  setSelectedTreatments(options.map(o => o.value));
-                }}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 outline-none transition-all min-h-[100px]"
-              >
-                {treatments.map((t) => (
-                  <option key={t.Treatment_ID} value={t.Treatment_ID}>
-                    {t.Treatment_Name} (Rs. {t.Base_Price})
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[160px] overflow-y-auto p-1 pr-2">
+              {treatments.map((t) => {
+                const strId = t.Treatment_ID.toString();
+                const isSelected = selectedTreatments.includes(strId);
+                return (
+                  <button
+                    type="button"
+                    key={t.Treatment_ID}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedTreatments(selectedTreatments.filter(id => id !== strId));
+                      } else {
+                        setSelectedTreatments([...selectedTreatments, strId]);
+                      }
+                    }}
+                    className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+                      isSelected 
+                        ? "bg-sky-50 border-sky-500 shadow-[0_2px_10px_-3px_rgba(14,165,233,0.3)] dark:bg-sky-500/10 dark:border-sky-500/50" 
+                        : "bg-white border-slate-200 hover:border-sky-300 hover:shadow-sm dark:bg-slate-800 dark:border-white/10 dark:hover:border-sky-500/30"
+                    }`}
+                  >
+                    <div className={`mt-0.5 flex-shrink-0 flex items-center justify-center h-5 w-5 rounded-md border transition-colors ${
+                      isSelected ? "bg-sky-500 border-sky-500 text-white dark:bg-sky-500 dark:border-sky-500" : "border-slate-300 dark:border-slate-600"
+                    }`}>
+                      {isSelected && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                    </div>
+                    <div>
+                      <div className={`text-sm font-bold ${isSelected ? "text-sky-900 dark:text-sky-100" : "text-slate-700 dark:text-slate-300"}`}>
+                        {t.Treatment_Name}
+                      </div>
+                      <div className={`text-xs mt-0.5 font-medium ${isSelected ? "text-sky-700 dark:text-sky-300" : "text-slate-500 dark:text-slate-400"}`}>
+                        Rs. {t.Base_Price}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Hold Ctrl (or Cmd) to select multiple</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
