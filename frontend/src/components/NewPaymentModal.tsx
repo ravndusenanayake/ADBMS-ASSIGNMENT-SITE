@@ -17,6 +17,7 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
   const [appointmentId, setAppointmentId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [amount, setAmount] = useState("");
+  const [amountTendered, setAmountTendered] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -53,8 +54,16 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalAmount = parseFloat(amount || "0");
+    const tendered = parseFloat(amountTendered || "0");
+    
     if (!appointmentId) return alert("Please select an appointment.");
     if (finalAmount <= 0) return alert("Total amount must be greater than zero.");
+    
+    if (paymentMethod === "Cash") {
+      if (tendered < finalAmount) {
+        return alert("Amount tendered cannot be less than the total amount.");
+      }
+    }
 
     setLoading(true);
     
@@ -75,6 +84,7 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
         setAppointmentId("");
         setPaymentMethod("Cash");
         setAmount("");
+        setAmountTendered("");
       } else {
         const errorData = await response.json();
         alert(`Failed to process payment: ${errorData.error}`);
@@ -159,7 +169,10 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
                 <select 
                   required
                   value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  onChange={(e) => {
+                    setPaymentMethod(e.target.value);
+                    if (e.target.value !== "Cash") setAmountTendered("");
+                  }}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 outline-none transition-all appearance-none"
                 >
                   <option value="Cash">Cash</option>
@@ -169,6 +182,35 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
                 </select>
               </div>
             </div>
+
+            {paymentMethod === "Cash" && (
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-white/10">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Cash Given</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    required
+                    value={amountTendered}
+                    onChange={(e) => setAmountTendered(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/30 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Balance</label>
+                  <div className={`w-full rounded-xl px-4 py-2 font-bold ${
+                    parseFloat(amountTendered || "0") - parseFloat(amount || "0") >= 0 
+                      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20" 
+                      : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 border border-red-100 dark:border-red-500/20"
+                  }`}>
+                    Rs. {amount && amountTendered 
+                      ? (parseFloat(amountTendered) - parseFloat(amount)).toFixed(2) 
+                      : "0.00"}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="pt-4 mt-6 flex gap-3 border-t border-slate-100 dark:border-white/10">
@@ -181,7 +223,7 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
             </button>
             <button 
               type="submit" 
-              disabled={loading || !appointmentId || parseFloat(amount || "0") <= 0}
+              disabled={loading || !appointmentId || parseFloat(amount || "0") <= 0 || (paymentMethod === "Cash" && parseFloat(amountTendered || "0") < parseFloat(amount || "0"))}
               className="flex-1 btn-primary text-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? "Processing..." : "Process Payment"}
