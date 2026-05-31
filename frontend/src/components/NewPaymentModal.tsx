@@ -32,7 +32,6 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
 
   // Calculate amount based on the selected appointment
   const selectedAppointment = appointments.find(a => a.Appointment_ID.toString() === appointmentId);
@@ -87,6 +86,8 @@ export function NewPaymentModal({ isOpen, onClose, onSuccess }: NewPaymentModalP
       setLoading(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
