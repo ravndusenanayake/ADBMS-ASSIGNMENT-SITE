@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Calendar, Clock, User, UserRound } from "lucide-react";
+import { X, Calendar, Clock, User, UserRound, Activity } from "lucide-react";
 
 interface BookAppointmentModalProps {
   isOpen: boolean;
@@ -14,21 +14,26 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess }: BookAppoint
   const [patients, setPatients] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [dentists, setDentists] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [treatments, setTreatments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   
   const [patientId, setPatientId] = useState("");
   const [dentistId, setDentistId] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [selectedTreatments, setSelectedTreatments] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       Promise.all([
         fetch("http://localhost:5000/api/patients").then(res => res.json()),
-        fetch("http://localhost:5000/api/dentists").then(res => res.json())
-      ]).then(([patientsData, dentistsData]) => {
+        fetch("http://localhost:5000/api/dentists").then(res => res.json()),
+        fetch("http://localhost:5000/api/treatments").then(res => res.json())
+      ]).then(([patientsData, dentistsData, treatmentsData]) => {
         setPatients(patientsData);
         setDentists(dentistsData);
+        setTreatments(treatmentsData);
       }).catch(err => console.error("Failed to fetch data:", err));
     }
   }, [isOpen]);
@@ -47,7 +52,8 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess }: BookAppoint
           patientId: parseInt(patientId),
           dentistId: parseInt(dentistId),
           date,
-          time
+          time,
+          treatmentIds: selectedTreatments
         })
       });
       
@@ -58,6 +64,7 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess }: BookAppoint
         setDentistId("");
         setDate("");
         setTime("");
+        setSelectedTreatments([]);
       } else {
         const errorData = await response.json();
         alert(`Failed to book appointment: ${errorData.error}`);
@@ -122,6 +129,29 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess }: BookAppoint
                 ))}
               </select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Treatments</label>
+            <div className="relative">
+              <Activity className="absolute left-3 top-3 text-slate-400" size={18} />
+              <select 
+                multiple
+                value={selectedTreatments}
+                onChange={(e) => {
+                  const options = Array.from(e.target.selectedOptions);
+                  setSelectedTreatments(options.map(o => o.value));
+                }}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 outline-none transition-all min-h-[100px]"
+              >
+                {treatments.map((t) => (
+                  <option key={t.Treatment_ID} value={t.Treatment_ID}>
+                    {t.Treatment_Name} (Rs. {t.Base_Price})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Hold Ctrl (or Cmd) to select multiple</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
