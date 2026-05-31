@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Search, DollarSign, Activity } from "lucide-react";
+import { NewTreatmentModal } from "@/components/NewTreatmentModal";
 
 export default function TreatmentsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [treatments, setTreatments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
+  const fetchTreatments = () => {
+    setLoading(true);
     fetch("http://localhost:5000/api/treatments")
       .then((res) => res.json())
       .then((data) => {
@@ -19,6 +22,10 @@ export default function TreatmentsPage() {
         console.error("Failed to fetch treatments:", err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchTreatments();
   }, []);
 
   return (
@@ -28,7 +35,10 @@ export default function TreatmentsPage() {
           <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Treatments & Services</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Manage dental procedures and pricing</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="btn-primary flex items-center gap-2"
+        >
           <Plus size={18} /> Add Treatment
         </button>
       </div>
@@ -58,7 +68,7 @@ export default function TreatmentsPage() {
                     <Activity size={24} strokeWidth={2} />
                   </div>
                   <span className="flex items-center gap-1 font-extrabold text-emerald-600 dark:text-emerald-400 text-lg bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
-                    <DollarSign size={16} /> {t.Cost}
+                    <DollarSign size={16} /> {t.Base_Price}
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{t.Treatment_Name}</h3>
@@ -71,6 +81,12 @@ export default function TreatmentsPage() {
           )}
         </div>
       </div>
+
+      <NewTreatmentModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchTreatments} 
+      />
     </div>
   );
 }
