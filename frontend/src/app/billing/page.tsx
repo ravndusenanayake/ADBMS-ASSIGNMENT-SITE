@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Search, CreditCard, Download, FileText } from "lucide-react";
+import { NewPaymentModal } from "@/components/NewPaymentModal";
 
 export default function BillingPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
+  const fetchPayments = () => {
+    setLoading(true);
     fetch("http://localhost:5000/api/payments")
       .then((res) => res.json())
       .then((data) => {
@@ -19,6 +22,10 @@ export default function BillingPage() {
         console.error("Failed to fetch payments:", err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchPayments();
   }, []);
 
   return (
@@ -28,7 +35,10 @@ export default function BillingPage() {
           <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Billing & Payments</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Process payments and view transaction history</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="btn-primary flex items-center gap-2"
+        >
           <CreditCard size={18} /> New Invoice
         </button>
       </div>
@@ -101,6 +111,12 @@ export default function BillingPage() {
           </table>
         </div>
       </div>
+      
+      <NewPaymentModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchPayments} 
+      />
     </div>
   );
 }
