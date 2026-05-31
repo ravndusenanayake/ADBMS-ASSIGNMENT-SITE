@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import { Search, CreditCard, Download, FileText } from "lucide-react";
 import { NewPaymentModal } from "@/components/NewPaymentModal";
+import { ReceiptModal } from "@/components/ReceiptModal";
 
 export default function BillingPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
 
   const fetchPayments = () => {
     setLoading(true);
@@ -100,7 +103,13 @@ export default function BillingPage() {
                       Rs. {p.Amount}
                     </td>
                     <td className="data-table-cell text-right">
-                      <button className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:text-white dark:hover:bg-white/10 rounded-lg transition-colors inline-flex items-center gap-2 text-xs font-bold">
+                      <button 
+                        onClick={() => {
+                          setSelectedPaymentId(p.Payment_ID);
+                          setIsReceiptOpen(true);
+                        }}
+                        className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:text-white dark:hover:bg-white/10 rounded-lg transition-colors inline-flex items-center gap-2 text-xs font-bold"
+                      >
                         <FileText size={16} /> Receipt
                       </button>
                     </td>
@@ -116,6 +125,15 @@ export default function BillingPage() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={fetchPayments} 
+      />
+
+      <ReceiptModal 
+        isOpen={isReceiptOpen}
+        onClose={() => {
+          setIsReceiptOpen(false);
+          setSelectedPaymentId(null);
+        }}
+        paymentId={selectedPaymentId}
       />
     </div>
   );
